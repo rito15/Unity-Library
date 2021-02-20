@@ -58,8 +58,12 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+
 # Additions by Rito
 *.cmd
 *.cmd.meta
 _*
 
+package.json.meta
+README.md.meta
+LICENSE.meta
