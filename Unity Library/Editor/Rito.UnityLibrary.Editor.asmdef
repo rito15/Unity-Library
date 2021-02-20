@@ -1,0 +1,17 @@
+{
+    "name": "Rito.UnityLibrary.Editor",
+    "references": [
+        "GUID:a5b5804f40c2ba34a9f1352f78f9c100"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

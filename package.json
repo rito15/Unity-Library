@@ -1,0 +1,16 @@
+{
+	"name" : "com.rito.unitylibrary",
+	"version": "1.0.0",
+	"displayName" :"Rito Unity Library 2021",
+	"description" :"Unity Library for Scripting Convenience and Optimization",
+	"unity": "2019.4",
+	"dependencies": {},
+	"keywords": ["rito","unity","library"],
+	"author":
+	{
+		"name":"Rito",
+		"email":"ghdtkals15@gmail.com",
+		"url":"https://github.com/rito15"
+	},
+	"category": "Unity"
+}
