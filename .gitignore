@@ -63,7 +63,3 @@ crashlytics-build.properties
 *.cmd
 *.cmd.meta
 _*
-
-package.json.meta
-README.md.meta
-LICENSE.meta
