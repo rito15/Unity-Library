@@ -3,12 +3,12 @@
 using System;
 using System.Collections.Generic;
 
+// 2020. 03. 23. 작성
+// 2020. 05. 12. TostringSimple() 작성
+// 2020. 05. 17. IsArrayType(), IsArrayOrListType() 작성
+
 namespace Rito.UnityLibrary.Extension
 {
-    // 2020. 03. 23. 작성
-    // 2020. 05. 12. TostringSimple() 작성
-    // 2020. 05. 17. IsArrayType(), IsArrayOrListType() 작성
-
     public static class TypeExtension
     {
         /// <summary>
