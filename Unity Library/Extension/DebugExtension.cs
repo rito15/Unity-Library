@@ -10,11 +10,49 @@ using UnityEngine;
 
 namespace Rito.UnityLibrary.Extension
 {
+    using static GlobalVariables;
+    using Debug = Rito.UnityLibrary.Debug;
+
     public static class DebugExtension
     {
-        public static void DebugLog<T>(this T @this)
+        /***********************************************************************
+        *                               Log
+        ***********************************************************************/
+        #region .
+        [System.Diagnostics.Conditional(ConditionalDebugKeyword)]
+        public static void Ex_DebugLog<T>(this T @this, LogType logType = LogType.Log)
+            => Debug.Log(@this, logType);
+
+        [System.Diagnostics.Conditional(ConditionalDebugKeyword)]
+        public static void Ex_DebugLog<T>(this T @this, string preString, LogType logType = LogType.Log)
+            => Debug.Log(preString + @this, logType);
+
+        #endregion
+        /***********************************************************************
+        *                               Assert
+        ***********************************************************************/
+        #region .
+        /// <summary>
+        /// 두 값이 같은지 여부를 콘솔에 출력
+        /// </summary>
+        /// <param name="printOnlyFailed">Assert 실패 시에만 로그를 출력할지 여부</param>
+        /// <param name="failLogType">Assert 실패 시 출력할 로그의 타입</param>
+        [System.Diagnostics.Conditional(ConditionalDebugKeyword)]
+        public static void Ex_AssertLog<T>
+            (this T @this, T other, bool printOnlyFailed = true, LogType failLogType = LogType.Error)
         {
-            Rito.UnityLibrary.Debug.Log(@this);
+            bool isEqual = @this.Equals(other);
+            if (isEqual && printOnlyFailed) return;
+
+            string result = $"ASSERT : {isEqual} [{(isEqual ? $"{@this}" : $"{@this}, {other}")}]";
+
+            if (isEqual)
+                Debug.Log(result);
+            else
+                Debug.Log(result, failLogType);
         }
+
+        #endregion
+
     }
 }

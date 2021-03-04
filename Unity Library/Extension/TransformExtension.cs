@@ -8,6 +8,13 @@ using UnityEngine;
 // 날짜 : 2021-02-28 AM 4:46:07
 // 작성자 : Rito
 
+/*
+    [목록]
+
+    - HasSameParent(Transform[]) : 모두 같은 부모 아래 있는지 검사
+
+*/
+
 namespace Rito.UnityLibrary.Extension
 {
     public static class TransformExtension
