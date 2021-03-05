@@ -6,17 +6,12 @@ using UnityEngine;
 // 날짜 : 2021-03-05 AM 3:22:50
 // 작성자 : Rito
 
-/******************
-
-                                Range, Clamp 테스트 필요 (아직 테스트 안함)
-
-****************/
-
 /*
     [작성 규칙]
 
     - 확장 메소드 접두어 Ex_
     - 값을 직접 수정하는 경우 리턴하지 않음, 메소드 접미어 Ref
+    - 아직 테스트 안된 메소드는 이름 맨 뒤에 __ 붙이기
 */
 
 /*
@@ -36,13 +31,13 @@ namespace Rito.UnityLibrary.Extension
         *                               Range, Clamp
         ***********************************************************************/
         #region .
-        /// <summary> (min &lt; value &lt; max) </summary>
-        public static bool Ex_InExclusiveRange(this float value, float min, float max)
-            => min < value && value < max;
-
         /// <summary> (min &lt;= value &lt;= max) </summary>
-        public static bool Ex_InInclusiveRange(this float value, float min, float max)
+        public static bool Ex_InclusiveRange(this float value, float min, float max)
             => min <= value && value <= max;
+
+        /// <summary> (min &lt; value &lt; max) </summary>
+        public static bool Ex_ExclusiveRange(this float value, float min, float max)
+            => min < value && value < max;
 
         /// <summary> 값의 범위 제한 </summary>
         public static float Ex_Clamp(this float value, float min, float max)

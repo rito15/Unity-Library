@@ -20,11 +20,11 @@ namespace Rito.UnityLibrary.Extension
         ***********************************************************************/
         #region .
         [System.Diagnostics.Conditional(ConditionalDebugKeyword)]
-        public static void Ex_DebugLog<T>(this T @this, LogType logType = LogType.Log)
+        public static void Ex_Log<T>(this T @this, LogType logType = LogType.Log)
             => Debug.Log(@this, logType);
 
         [System.Diagnostics.Conditional(ConditionalDebugKeyword)]
-        public static void Ex_DebugLog<T>(this T @this, string preString, LogType logType = LogType.Log)
+        public static void Ex_Log<T>(this T @this, string preString, LogType logType = LogType.Log)
             => Debug.Log(preString + @this, logType);
 
         #endregion
