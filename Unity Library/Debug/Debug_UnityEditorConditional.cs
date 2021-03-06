@@ -95,6 +95,22 @@ namespace Rito.UnityLibrary
         public static void Log(object message)
             => UnityEngine.Debug.Log(message);
 
+        /// <summary> 메시지들을 ", "로 구분하여 콘솔 창에 출력 </summary>
+        [Conditional(ConditionalDebugKeyword)]
+        public static void Log(params object[] messages)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            for(int i = 0; i < messages.Length; i++)
+            {
+                sb.Append(messages[i].ToString());
+
+                if(i < messages.Length - 1)
+                    sb.Append(", ");
+            }
+
+            UnityEngine.Debug.Log(sb);
+        }
+
         [Conditional(ConditionalDebugKeyword)]
         public static void Log(object message, Object context)
             => UnityEngine.Debug.Log(message, context);
