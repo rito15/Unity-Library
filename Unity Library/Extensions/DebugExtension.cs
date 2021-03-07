@@ -8,7 +8,7 @@ using UnityEngine;
 // 날짜 : 2021-02-26 AM 5:10:04
 // 작성자 : Rito
 
-namespace Rito.UnityLibrary.Extension
+namespace Rito.UnityLibrary.Extensions
 {
     using static GlobalVariables;
     using Debug = Rito.UnityLibrary.Debug;

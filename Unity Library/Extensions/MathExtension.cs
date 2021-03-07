@@ -23,7 +23,7 @@ using UnityEngine;
     - Saturate() : 값을 0 ~ 1 사이로 제한
 */
 
-namespace Rito.UnityLibrary.Extension
+namespace Rito.UnityLibrary.Extensions
 {
     public static class MathExtension
     {

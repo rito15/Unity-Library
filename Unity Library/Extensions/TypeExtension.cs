@@ -7,7 +7,7 @@ using System.Collections.Generic;
 // 2020. 05. 12. TostringSimple() 작성
 // 2020. 05. 17. IsArrayType(), IsArrayOrListType() 작성
 
-namespace Rito.UnityLibrary.Extension
+namespace Rito.UnityLibrary.Extensions
 {
     public static class TypeExtension
     {

@@ -15,10 +15,28 @@ using UnityEngine;
 
 */
 
-namespace Rito.UnityLibrary.Extension
+namespace Rito.UnityLibrary.Extensions
 {
     public static class TransformExtension
     {
+        /***********************************************************************
+        *                               Getters
+        ***********************************************************************/
+        #region .
+        /// <summary> 조상이 몇 명인지 깊이 구하기 </summary>
+        public static int Ex_GetDepth(this Transform @this)
+        {
+            int depth = 0;
+            Transform current = @this;
+            while (current.parent != null)
+            {
+                current = current.parent;
+                depth++;
+            }
+            return depth;
+        }
+
+        #endregion
         /***********************************************************************
         *                       Transform Array Extensions
         ***********************************************************************/

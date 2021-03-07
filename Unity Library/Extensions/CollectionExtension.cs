@@ -22,7 +22,7 @@ using UnityEngine;
     Shuffle() : 리스트, 배열의 내용을 무작위로 섞기
 */
 
-namespace Rito.UnityLibrary.Extension
+namespace Rito.UnityLibrary.Extensions
 {
     using static GlobalVariables;
     using Debug = Rito.UnityLibrary.Debug;

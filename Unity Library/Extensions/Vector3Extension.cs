@@ -8,7 +8,7 @@ using UnityEngine;
 // 날짜 : 2021-02-26 AM 12:51:10
 // 작성자 : Rito
 
-namespace Rito.UnityLibrary.Extension
+namespace Rito.UnityLibrary.Extensions
 {
     public static class Vector3Extension
     {

@@ -1,13 +1,14 @@
 #if UNITY_EDITOR
 
 using System;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-using Rito.UnityLibrary.Extension;
+using Rito.UnityLibrary.Extensions;
 
 using Object = UnityEngine.Object;
 
@@ -270,6 +271,59 @@ namespace Rito.UnityLibrary.Editor
                 Selection.objects = childTrList.Select(tr => tr.gameObject).ToArray();
             }
         }
+
+        /// <summary> 같은 이름으로 바꾸기 </summary>
+        [MenuItem("GameObject/Rito/Rename (Same)", priority = PriorityBegin + 1)]
+        private static void GameObject_RenameWithTheSame()
+        {
+            if (IsDuplicatedMethodCall()) return;
+            if (!IsGameObjectInHierarchySelected()) return;
+            if (Selection.gameObjects.Length <= 1) return; // 하나만 선택한 경우 안함
+
+            // * 부모가 같지 않아도, 하이라키의 맨 위를 기준으로 이름 변경
+
+            // 하이라키의 위에서부터 아래로 정렬
+            var selectedGameObjects = 
+                Selection.gameObjects
+                .OrderBy(go => go.transform.GetSiblingIndex())
+                .OrderBy(go => go.transform.Ex_GetDepth())
+                .OrderBy(go => go.transform.root.GetSiblingIndex())
+                .ToArray();
+
+            for (int i = 1; i < selectedGameObjects.Length; i++)
+            {
+                Undo.RecordObject(selectedGameObjects[i], "Rename GameObject");
+                selectedGameObjects[i].name = selectedGameObjects[0].name;
+            }
+        }
+
+        [MenuItem("GameObject/Rito/Rename (Continuous)", priority = PriorityBegin + 1)]
+        private static void GameObject_RenameWithTheContinuous()
+        {
+            if (IsDuplicatedMethodCall()) return;
+            if (!IsGameObjectInHierarchySelected()) return;
+            if (Selection.gameObjects.Length <= 1) return; // 하나만 선택한 경우 안함
+            if (!SelectedTopLevelTransforms.Ex_HasSameParent())
+            {
+                Debug.LogError("부모가 같은 게임오브젝트들을 선택해야 합니다.");
+                return;
+            }
+
+            // Sibling Index로 정렬
+            var selectedGameObjects = Selection.gameObjects.OrderBy(go => go.transform.GetSiblingIndex()).ToArray();
+
+            // Regex 이용
+            // @"[\s\[\{\(\<][0-9]+[\s\]\}\)\>]*\s*$"
+            Regex regex = new Regex(@"[\s\[\{\(\<][0-9]+[\s\]\}\)\>]*\s*$");
+
+            
+            foreach (var go in selectedGameObjects)
+            {
+                Debug.Log(go.name, regex.Match(go.name));
+            }
+        }
+
+
 
         #endregion
 
