@@ -297,6 +297,7 @@ namespace Rito.UnityLibrary.Editor
             }
         }
 
+        /// <summary> 연속된 이름으로 바꾸기 (인덱스 유지) </summary>
         [MenuItem("GameObject/Rito/Rename (Continuous)", priority = PriorityBegin + 1)]
         private static void GameObject_RenameWithTheContinuous()
         {
@@ -313,17 +314,42 @@ namespace Rito.UnityLibrary.Editor
             var selectedGameObjects = Selection.gameObjects.OrderBy(go => go.transform.GetSiblingIndex()).ToArray();
 
             // Regex 이용
-            // @"[\s\[\{\(\<][0-9]+[\s\]\}\)\>]*\s*$"
-            Regex regex = new Regex(@"[\s\[\{\(\<][0-9]+[\s\]\}\)\>]*\s*$");
+            string strInput = selectedGameObjects[0].name;
+            string pattern = @"([\s\[\{\(\<]+)" + @"([0-9]+)" + @"([\s\]\}\)\>]+)$";
+            //string replaceArea = @"$1X$3";
+            string replaceNumber = @"$2";
 
-            
-            foreach (var go in selectedGameObjects)
+            Regex regex = new Regex(pattern, RegexOptions.RightToLeft);
+
+            // 문자열 내에 인덱스
+            bool isMatched = regex.IsMatch(strInput);
+            int index = 0;
+            if (isMatched)
             {
-                Debug.Log(go.name, regex.Match(go.name));
+                int.TryParse(regex.Match(strInput).Result(replaceNumber), out index);
+            }
+
+            string nameBase = selectedGameObjects[0].name;
+
+            // 1. 이름 뒷부분에 숫자가 없는 경우 : "이름 [0]" 꼴
+            if (!isMatched)
+            {
+                foreach (var go in selectedGameObjects)
+                {
+                    Undo.RecordObject(go, "Rename GameObject");
+                    go.name = $"{nameBase} [{index++}]";
+                }
+            }
+            // 2. 이름 뒷부분에 숫자가 존재하는 경우 : 현재 숫자와 특수문자꼴 유지하면서 차례로 변경
+            else
+            {
+                foreach (var go in selectedGameObjects)
+                {
+                    Undo.RecordObject(go, "Rename GameObject");
+                    go.name = regex.Replace(nameBase, @"$1") + (index++) + regex.Match(nameBase).Result(@"$3");
+                }
             }
         }
-
-
 
         #endregion
 
