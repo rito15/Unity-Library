@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEditor;
 
@@ -15,12 +16,12 @@ using Object = UnityEngine.Object;
 // 날짜 : 2021-02-27 PM 11:16:42
 // 작성자 : Rito
 
-namespace Rito.UnityLibrary.Editor
+namespace Rito.UnityLibrary.EditorPlugins
 {
-    public static class MenuItems
+    public static class HierarchyMenuItems
     {
         /***********************************************************************
-        *                               Definitions
+        *                           Definitions
         ***********************************************************************/
         #region .
         [Flags]
