@@ -167,9 +167,10 @@ namespace Rito.UnityLibrary.EditorPlugins
         ***********************************************************************/
         #region .
 
-        const int PriorityBegin = -1000;
+        private const string GameObject_Rito_ = "GameObject/Rito/";
+        private const int PriorityBegin = -1000;
 
-        /*[MenuItem("GameObject/Rito/Test", priority = PriorityBegin - 999)]
+        /*[MenuItem(GameObject_Rito_ + "Test", priority = PriorityBegin - 999)]
         private static void TEST()
         {
             if (IsDuplicatedMethodCall()) return;
@@ -179,7 +180,7 @@ namespace Rito.UnityLibrary.EditorPlugins
         }*/
 
         /// <summary> 선택된 게임오브젝트들을 하나의 부모 게임오브젝트로 묶기  </summary>
-        [MenuItem("GameObject/Rito/Group", priority = PriorityBegin)]
+        [MenuItem(GameObject_Rito_ + "Group", priority = PriorityBegin)]
         private static void GameObject_GroupAsCommonEmptyParent()
         {
             if (IsDuplicatedMethodCall()) return;
@@ -224,7 +225,7 @@ namespace Rito.UnityLibrary.EditorPlugins
         }
 
         /// <summary> 자식들을 제거하지 않고 선택된 게임오브젝트만 제거 </summary>
-        [MenuItem("GameObject/Rito/Remove This Only", priority = PriorityBegin + 1)]
+        [MenuItem(GameObject_Rito_ + "Remove This Only", priority = PriorityBegin + 1)]
         private static void GameObject_RemoveThisOnly()
         {
             if (IsDuplicatedMethodCall()) return;
@@ -274,7 +275,7 @@ namespace Rito.UnityLibrary.EditorPlugins
         }
 
         /// <summary> 같은 이름으로 바꾸기 </summary>
-        [MenuItem("GameObject/Rito/Rename (Same)", priority = PriorityBegin + 1)]
+        [MenuItem(GameObject_Rito_ + "Rename (Same)", priority = PriorityBegin + 1)]
         private static void GameObject_RenameWithTheSame()
         {
             if (IsDuplicatedMethodCall()) return;
@@ -299,7 +300,7 @@ namespace Rito.UnityLibrary.EditorPlugins
         }
 
         /// <summary> 연속된 이름으로 바꾸기 (인덱스 유지) </summary>
-        [MenuItem("GameObject/Rito/Rename (Continuous)", priority = PriorityBegin + 1)]
+        [MenuItem(GameObject_Rito_ + "Rename (Continuous)", priority = PriorityBegin + 1)]
         private static void GameObject_RenameWithTheContinuous()
         {
             if (IsDuplicatedMethodCall()) return;

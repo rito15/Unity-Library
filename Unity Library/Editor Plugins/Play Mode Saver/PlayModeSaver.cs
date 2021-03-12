@@ -81,6 +81,23 @@ namespace Rito.UnityLibrary.EditorPlugins
                 _targetList.Remove(com);
         }
 
+        /// <summary> 게임오브젝트 내의 모든 컴포넌트를 등록 </summary>
+        public void AddAllComponentsInGameObject()
+        {
+            var allComponents = gameObject.GetComponents<Component>();
+            foreach (var com in allComponents)
+            {
+                if(!_targetList.Contains(com))
+                    _targetList.Add(com);
+            }
+        }
+
+        /// <summary> 대상으로 등록된 컴포넌트를 모두 해제 </summary>
+        public void RemoveAllTargetComponents()
+        {
+            _targetList.Clear();
+        }
+
         public bool CheckContainedInList(Component com)
         {
             return (com != null && _targetList.Contains(com));

@@ -13,7 +13,7 @@ namespace Rito.UnityLibrary.EditorPlugins
 {
     public class SceneAutoSaverWindow : EditorWindow
     {
-        [MenuItem("Window/Rito/Scene Auto Saver")]
+        [MenuItem("Tools/Rito/Scene Auto Saver")]
         private static void Init()
         {
             // 현재 활성화된 윈도우 가져오며, 없으면 새로 생성

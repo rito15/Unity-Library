@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+#if UNITY_EDITOR && RITO_USE_CUSTOM_TRANSFORM_EDITOR
 
 using UnityEngine;
 using UnityEditor;
@@ -40,14 +40,20 @@ namespace Rito.UnityLibrary.EditorPlugins
                 _trguiRotationFieldMethod = bunch.RotationField;
             }
 
-            _trguiOnEnableMethod.Invoke(_localRotationGUI, new object[] {
+            try
+            {
+                _trguiOnEnableMethod.Invoke(_localRotationGUI, new object[] {
                 base.serializedObject.FindProperty("m_LocalRotation"), EditorGUIUtility.TrTextContent("Local Rotation")
-            });
+                });
+            }
+            // SerializedObjectNotCreatableException
+            catch (System.Exception) { }
+
         }
         /***********************************************************************
         *                               Inspector Methods
         ***********************************************************************/
-        #region .
+#region .
         public override void OnInspectorGUI()
         {
             // 1. Local Transform
@@ -198,11 +204,11 @@ namespace Rito.UnityLibrary.EditorPlugins
             EditorGUILayout.EndHorizontal();
         }
 
-        #endregion
+#endregion
         /***********************************************************************
         *                               Private Methods
         ***********************************************************************/
-        #region .
+#region .
         /// <summary> 버튼을 그립니당 </summary>
         private void DrawRefreshButton(in Color color, System.Action action)
         {
@@ -247,17 +253,17 @@ namespace Rito.UnityLibrary.EditorPlugins
             return vector;
         }
 
-        #endregion
+#endregion
         /***********************************************************************
         *                               Public Methods
         ***********************************************************************/
-        #region .
+#region .
         public static void LoadGlobalFoldOutValue(bool value)
         {
             globalFoldOut = value;
         }
 
-        #endregion
+#endregion
     }
 }
 #endif

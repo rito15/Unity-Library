@@ -96,7 +96,7 @@ namespace Rito.UnityLibrary.EditorPlugins
         ***********************************************************************/
         #region .
         // 1. On/Off
-        private const string ActivationMenuName = "Window/Rito/Model Pivot Resetter/Activated";
+        private const string ActivationMenuName = "Tools/Rito/Model Pivot Resetter/Activated";
         private const string ActivationSettingName = "ModelPivotResetterActivated";
 
         public static bool Activated
@@ -116,7 +116,7 @@ namespace Rito.UnityLibrary.EditorPlugins
         }
 
         // 2. Show Dialog
-        private const string ShowDialogMenuName = "Window/Rito/Model Pivot Resetter/Show Dialog";
+        private const string ShowDialogMenuName = "Tools/Rito/Model Pivot Resetter/Show Dialog";
         private const string ShowDialogSettingName = "ModelPivotResetterShowDialog";
 
         public static bool ShowDialog

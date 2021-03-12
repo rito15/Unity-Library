@@ -140,10 +140,12 @@ namespace Rito.UnityLibrary.EditorPlugins
         *                           Save & Restore Component - Context Menu
         ***********************************************************************/
         #region .
+        private const string ContextMenuItem_Add = "CONTEXT/Component/Save PlayMode Changes";
+        private const string ContextMenuItem_Remove = "CONTEXT/Component/Don't Save PlayMode Changes";
         private const int ContextMenuPriority = 200;
 
         /// <summary> 우클릭 메뉴 - 플레이모드 저장 대상 컴포넌트로 리스트에 추가 </summary>
-        [MenuItem("CONTEXT/Component/Save PlayMode Changes", false, ContextMenuPriority)]
+        [MenuItem(ContextMenuItem_Add, false, ContextMenuPriority)]
         private static void Context_SaveChanges(MenuCommand mc)
         {
             var thisComponent = mc.context as Component;
@@ -156,8 +158,8 @@ namespace Rito.UnityLibrary.EditorPlugins
             pms.AddTargetComponentToList(thisComponent);
         }
 
-        [MenuItem("CONTEXT/Component/Save PlayMode Changes", true, ContextMenuPriority)]
-        private static bool ValidateContext_SaveChanges(MenuCommand mc)
+        [MenuItem(ContextMenuItem_Add, true, ContextMenuPriority)]
+        private static bool Context_SaveChanges_Validate(MenuCommand mc)
         {
             if(PrefabUtility.GetPrefabAssetType(mc.context) != PrefabAssetType.NotAPrefab) return false;
             //if(!Application.IsPlaying(mc.context)) return false;
@@ -175,7 +177,7 @@ namespace Rito.UnityLibrary.EditorPlugins
         }
 
         /// <summary> 우클릭 메뉴 - 플레이모드 저장 대상 컴포넌트에서 제외 </summary>
-        [MenuItem("CONTEXT/Component/Don't Save PlayMode Changes", false, ContextMenuPriority)]
+        [MenuItem(ContextMenuItem_Remove, false, ContextMenuPriority)]
         private static void Context_DontSaveChanges(MenuCommand mc)
         {
             var thisComponent = mc.context as Component;
@@ -188,8 +190,8 @@ namespace Rito.UnityLibrary.EditorPlugins
             }
         }
 
-        [MenuItem("CONTEXT/Component/Don't Save PlayMode Changes", true, ContextMenuPriority)]
-        private static bool ValidateContext_DontSaveChanges(MenuCommand mc)
+        [MenuItem(ContextMenuItem_Remove, true, ContextMenuPriority)]
+        private static bool Context_DontSaveChanges_Validate(MenuCommand mc)
         {
             if(PrefabUtility.GetPrefabAssetType(mc.context) != PrefabAssetType.NotAPrefab) return false;
             //if(!Application.IsPlaying(mc.context)) return false;
@@ -241,7 +243,7 @@ namespace Rito.UnityLibrary.EditorPlugins
             else
                 pmsDict.Add(id, data);
 
-            Debug.Log("Save");
+            //Debug.Log("Save");
         }
 
         /// <summary> PlayModeSaver 컴포넌트의 데이터 복구 </summary>
@@ -276,7 +278,7 @@ namespace Rito.UnityLibrary.EditorPlugins
             pms._alwaysOnTop = pmsDict[cid].alwaysOnTop;
             pms._targetList = listCopy;
 
-            Debug.Log("Restore");
+            //Debug.Log("Restore");
         }
 
         #endregion
