@@ -77,7 +77,7 @@ namespace Rito.UnityLibrary.EditorPlugins
             }
         }
 
-        private static Dictionary<IdPair, SerializedObject> dataForSaveDict
+        private static readonly Dictionary<IdPair, SerializedObject> dataForSaveDict
             = new Dictionary<IdPair, SerializedObject>();
 
         /// <summary> 에디터모드로 돌아왔을 때 복원할 컴포넌트 등록 </summary>

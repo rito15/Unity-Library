@@ -252,10 +252,11 @@ namespace Rito.UnityLibrary.EditorPlugins
 
             // 헤더 높이 + 패딩 * 2
             float headerAreaH = headerH + padding * 2f;
-
             float headerY = boxY + padding;
-            float headerW = EditorGUIUtility.currentViewWidth - headerX * 2f;
-            float boxW = headerW + headerX;
+
+            float viewWidth = EditorGUIUtility.currentViewWidth;
+            float headerW = viewWidth - headerX * 2f;
+            float boxW = viewWidth - boxX * 2f;
 
             // 펼쳤을 때만 박스 보여주기
             boxH = foldout ? (boxH + headerAreaH) : (headerAreaH);
