@@ -140,8 +140,8 @@ namespace Rito.UnityLibrary.EditorPlugins
         *                           Save & Restore Component - Context Menu
         ***********************************************************************/
         #region .
-        private const string ContextMenuItem_Add = "CONTEXT/Component/Save PlayMode Changes";
-        private const string ContextMenuItem_Remove = "CONTEXT/Component/Don't Save PlayMode Changes";
+        private const string ContextMenuItem_Add = "CONTEXT/Component/Save Play Mode Changes";
+        private const string ContextMenuItem_Remove = "CONTEXT/Component/Don't Save Play Mode Changes";
         private const int ContextMenuPriority = 200;
 
         /// <summary> 우클릭 메뉴 - 플레이모드 저장 대상 컴포넌트로 리스트에 추가 </summary>

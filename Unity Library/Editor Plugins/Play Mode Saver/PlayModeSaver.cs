@@ -69,16 +69,9 @@ namespace Rito.UnityLibrary.EditorPlugins
         {
             if(com == null) return;
             if(_targetList.Contains(com)) return;
+            if(com is PlayModeSaver) return;
 
             _targetList.Add(com);
-        }
-
-        /// <summary> 대상 컴포넌트를 리스트에서 제거 </summary>
-        public void RemoveTargetComponentFromList(Component com)
-        {
-            if(com == null) return;
-            if(_targetList.Contains(com))
-                _targetList.Remove(com);
         }
 
         /// <summary> 게임오브젝트 내의 모든 컴포넌트를 등록 </summary>
@@ -87,9 +80,16 @@ namespace Rito.UnityLibrary.EditorPlugins
             var allComponents = gameObject.GetComponents<Component>();
             foreach (var com in allComponents)
             {
-                if(!_targetList.Contains(com))
-                    _targetList.Add(com);
+                AddTargetComponentToList(com);
             }
+        }
+
+        /// <summary> 대상 컴포넌트를 리스트에서 제거 </summary>
+        public void RemoveTargetComponentFromList(Component com)
+        {
+            if(com == null) return;
+            if(_targetList.Contains(com))
+                _targetList.Remove(com);
         }
 
         /// <summary> 대상으로 등록된 컴포넌트를 모두 해제 </summary>

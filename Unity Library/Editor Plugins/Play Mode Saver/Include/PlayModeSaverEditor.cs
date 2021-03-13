@@ -16,15 +16,65 @@ namespace Rito.UnityLibrary.EditorPlugins
     [CustomEditor(typeof(PlayModeSaver))]
     public class PlayModeSaverEditor : UnityEditor.Editor
     {
+        /***********************************************************************
+        *                               Fields
+        ***********************************************************************/
+        #region .
         private PlayModeSaver pms;
 
         private static readonly Color GreenColor = Color.green;
         private static readonly Color RedColor = Color.red * 2f;
+        private static readonly Color HeaderColorA = new Color(4.0f, 5.0f, 4.0f, 4.0f);
+        private static readonly Color HeaderColorB = new Color(4.0f, 4.0f, 5.0f, 4.0f);
+        private static readonly Color HeaderColorC = new Color(5.0f, 4.0f, 4.0f, 4.0f);
 
-        private static bool foldoutA = true;
-        private static bool foldoutB = true;
-        private static bool foldoutC = true;
+        #endregion
+        /***********************************************************************
+        *                               Editor Prefs
+        ***********************************************************************/
+        #region .
+        private struct BoolPref
+        {
+            private readonly bool defaultValue;
+            public bool value;
+            public string name;
 
+            public BoolPref(string name, bool defaultValue)
+            {
+                this.name = name;
+                this.value = this.defaultValue = defaultValue;
+            }
+
+            public static implicit operator bool(BoolPref other) => other.value;
+
+            public void SaveToEditorPref()
+                => EditorPrefs.SetBool(name, value);
+
+            public void LoadFromEditorPref()
+                => value = EditorPrefs.GetBool(name, defaultValue);
+
+            public void Set(bool newValue)
+                => value = newValue;
+        }
+
+        private static BoolPref foldoutA = new BoolPref("PMS_Foldout_A", true);
+        private static BoolPref foldoutB = new BoolPref("PMS_Foldout_B", true);
+        private static BoolPref foldoutC = new BoolPref("PMS_Foldout_C", true);
+
+        // 플레이모드 진입 시, 컴파일 시 값 다시 읽어와 복원
+        [InitializeOnLoadMethod]
+        private static void LoadPrefValues()
+        {
+            foldoutA.LoadFromEditorPref();
+            foldoutB.LoadFromEditorPref();
+            foldoutC.LoadFromEditorPref();
+        }
+
+        #endregion
+        /***********************************************************************
+        *                               Manual Editor Control
+        ***********************************************************************/
+        #region .
         /// <summary> [수동] 현재 그려질 컨트롤의 Y 위치 </summary>
         private float currentY = 0f;
 
@@ -41,6 +91,11 @@ namespace Rito.UnityLibrary.EditorPlugins
             currentY += value;
         }
 
+        #endregion
+        /***********************************************************************
+        *                               Editor Event Methods
+        ***********************************************************************/
+        #region .
         private void OnEnable()
         {
             pms = target as PlayModeSaver;
@@ -70,10 +125,21 @@ namespace Rito.UnityLibrary.EditorPlugins
             GUI.contentColor = oldcntColor;
         }
 
+        #endregion
+        /***********************************************************************
+        *                               Draw Methods
+        ***********************************************************************/
+        #region .
         private void DrawOptions()
         {
-            foldoutA = DrawFoldoutHeaderBox(currentY, 22f, foldoutA, "Options",
-                Color.black, Color.white * 4f, Color.black);
+            using (var check = new EditorGUI.ChangeCheckScope())
+            {
+                foldoutA.Set(DrawFoldoutHeaderBox(currentY, 22f, foldoutA, "Options",
+                    Color.black, HeaderColorA, Color.black));
+
+                if (check.changed)
+                    foldoutA.SaveToEditorPref();
+            }
 
             if (foldoutA)
             {
@@ -102,8 +168,14 @@ namespace Rito.UnityLibrary.EditorPlugins
 
         private void DrawFunctions()
         {
-            foldoutB = DrawFoldoutHeaderBox(currentY, 22f, foldoutB, "Functions",
-                Color.black, Color.white * 4f, Color.black);
+            using (var check = new EditorGUI.ChangeCheckScope())
+            {
+                foldoutB.Set(DrawFoldoutHeaderBox(currentY, 22f, foldoutB, "Functions",
+                    Color.black, HeaderColorB, Color.black));
+
+                if (check.changed)
+                    foldoutB.SaveToEditorPref();
+            }
 
             if (foldoutB)
             {
@@ -130,8 +202,14 @@ namespace Rito.UnityLibrary.EditorPlugins
 
         private void DrawComponentListBox()
         {
-            foldoutC = DrawFoldoutHeaderBox(currentY, 21f * pms._targetList.Count, foldoutC, "Components",
-                Color.black, Color.white * 4f, Color.black);
+            using (var check = new EditorGUI.ChangeCheckScope())
+            {
+                foldoutC.Set(DrawFoldoutHeaderBox(currentY, 21f * pms._targetList.Count, foldoutC, "Components",
+                    Color.black, HeaderColorC, Color.black));
+
+                if(check.changed)
+                    foldoutA.SaveToEditorPref();
+            }
 
             if (foldoutC)
             {
@@ -151,10 +229,15 @@ namespace Rito.UnityLibrary.EditorPlugins
                             pms._targetList.RemoveAt(i);
                         }
                     }
-                    //NextY(22f);
                 }
             }
         }
+
+        #endregion
+        /***********************************************************************
+        *                               Private Methods
+        ***********************************************************************/
+        #region .
 
         // boxY : 그려질 Y 위치
         // boxH : 헤더를 제외한, 순수한 박스의 높이
@@ -171,7 +254,7 @@ namespace Rito.UnityLibrary.EditorPlugins
             float headerAreaH = headerH + padding * 2f;
 
             float headerY = boxY + padding;
-            float headerW = EditorGUIUtility.currentViewWidth - headerX - padding;
+            float headerW = EditorGUIUtility.currentViewWidth - headerX * 2f;
             float boxW = headerW + headerX;
 
             // 펼쳤을 때만 박스 보여주기
@@ -192,6 +275,7 @@ namespace Rito.UnityLibrary.EditorPlugins
 
             return foldout;
         }
+        #endregion
     }
 }
 
