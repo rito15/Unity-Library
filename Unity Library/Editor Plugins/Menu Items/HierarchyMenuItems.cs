@@ -28,11 +28,11 @@ namespace Rito.UnityLibrary.EditorPlugins
         private enum EditorWindowType
         {
             Scene = 1,
-            Game  = 2,
+            Game = 2,
             Inspector = 4,
             Hierarchy = 8,
-            Project   = 16,
-            Console   = 32
+            Project = 16,
+            Console = 32
         }
 
         #endregion
@@ -67,7 +67,7 @@ namespace Rito.UnityLibrary.EditorPlugins
 
             foreach (var item in enumElements)
             {
-                if((type & item) != 0 && item.ToString() == currentWindowTitle)
+                if ((type & item) != 0 && item.ToString() == currentWindowTitle)
                     return true;
             }
 
@@ -82,7 +82,7 @@ namespace Rito.UnityLibrary.EditorPlugins
 
             if (Selection.activeGameObject == null)
             {
-                EditorUtility.DisplayDialog($"Rito", "게임오브젝트를 선택하세요", "OK");
+                //EditorUtility.DisplayDialog($"Rito", "게임오브젝트를 선택하세요", "OK");
                 return false;
             }
             return true;
@@ -97,8 +97,8 @@ namespace Rito.UnityLibrary.EditorPlugins
             var existed = Selection.activeGameObject.GetComponent<T>();
             if (existed != null)
             {
-                EditorUtility.DisplayDialog("Rito", $"해당 게임오브젝트에 " +
-                    $"{(componentName.Length > 0 ? componentName : typeof(T).Ex_ToStringSimple())} 컴포넌트가 이미 존재합니다.", "OK");
+                //EditorUtility.DisplayDialog("Rito", $"해당 게임오브젝트에 " +
+                //    $"{(componentName.Length > 0 ? componentName : typeof(T).Ex_ToStringSimple())} 컴포넌트가 이미 존재합니다.", "OK");
                 return false;
             }
 
@@ -114,8 +114,8 @@ namespace Rito.UnityLibrary.EditorPlugins
             var existed = Selection.activeGameObject.GetComponent(type);
             if (existed != null)
             {
-                EditorUtility.DisplayDialog("Rito", $"해당 게임오브젝트에 " +
-                    $"{(componentName.Length > 0 ? componentName : type.Ex_ToStringSimple())} 컴포넌트가 이미 존재합니다.", "OK");
+                //EditorUtility.DisplayDialog("Rito", $"해당 게임오브젝트에 " +
+                //    $"{(componentName.Length > 0 ? componentName : type.Ex_ToStringSimple())} 컴포넌트가 이미 존재합니다.", "OK");
                 return false;
             }
 
@@ -179,17 +179,12 @@ namespace Rito.UnityLibrary.EditorPlugins
             CheckFocusedWindow(EditorWindowType.Game | EditorWindowType.Console).DebugLog();
         }*/
 
+        // Ctrl + G
         /// <summary> 선택된 게임오브젝트들을 하나의 부모 게임오브젝트로 묶기  </summary>
-        [MenuItem(GameObject_Rito_ + "Group", priority = PriorityBegin)]
+        [MenuItem(GameObject_Rito_ + "Group %G", priority = PriorityBegin)]
         private static void GameObject_GroupAsCommonEmptyParent()
         {
             if (IsDuplicatedMethodCall()) return;
-            if (!IsGameObjectInHierarchySelected()) return;
-            if (!SelectedTopLevelTransforms.Ex_HasSameParent())
-            {
-                Debug.LogError("부모가 같은 게임오브젝트들을 선택해야 합니다.");
-                return;
-            }
 
             var selectedTransforms = Selection.transforms.OrderBy(tr => tr.GetSiblingIndex());
 
@@ -224,17 +219,20 @@ namespace Rito.UnityLibrary.EditorPlugins
             InvokeKeyEventOnFocusedWindow(KeyCode.RightArrow, EventType.KeyDown); // 두번 해야 함
         }
 
+        [MenuItem(GameObject_Rito_ + "Group %G", true)]
+        private static bool Validate_GameObject_GroupAsCommonEmptyParent()
+        {
+            if (!IsGameObjectInHierarchySelected()) return false;
+            if (!SelectedTopLevelTransforms.Ex_HasSameParent()) return false;
+            return true;
+        }
+
+
         /// <summary> 자식들을 제거하지 않고 선택된 게임오브젝트만 제거 </summary>
         [MenuItem(GameObject_Rito_ + "Remove This Only", priority = PriorityBegin + 1)]
         private static void GameObject_RemoveThisOnly()
         {
             if (IsDuplicatedMethodCall()) return;
-            if (!IsGameObjectInHierarchySelected()) return;
-            if (SelectedAllTransforms.Length > 1)
-            {
-                Debug.LogError("하나의 게임오브젝트만 선택해야 합니다.");
-                return;
-            }
 
             Transform selected = Selection.activeTransform;
             int childCount = selected.childCount;
@@ -274,18 +272,26 @@ namespace Rito.UnityLibrary.EditorPlugins
             }
         }
 
+        [MenuItem(GameObject_Rito_ + "Remove This Only", true)]
+        private static bool Validate_GameObject_RemoveThisOnly()
+        {
+            if (!IsGameObjectInHierarchySelected()) return false;
+            if (SelectedAllTransforms.Length > 1) return false;
+            return true;
+        }
+
+
+        // Shift + F2
         /// <summary> 같은 이름으로 바꾸기 </summary>
-        [MenuItem(GameObject_Rito_ + "Rename (Same)", priority = PriorityBegin + 1)]
+        [MenuItem(GameObject_Rito_ + "Rename (Same) #F2", priority = PriorityBegin + 2)]
         private static void GameObject_RenameWithTheSame()
         {
             if (IsDuplicatedMethodCall()) return;
-            if (!IsGameObjectInHierarchySelected()) return;
-            if (Selection.gameObjects.Length <= 1) return; // 하나만 선택한 경우 안함
 
             // * 부모가 같지 않아도, 하이라키의 맨 위를 기준으로 이름 변경
 
             // 하이라키의 위에서부터 아래로 정렬
-            var selectedGameObjects = 
+            var selectedGameObjects =
                 Selection.gameObjects
                 .OrderBy(go => go.transform.GetSiblingIndex())
                 .OrderBy(go => go.transform.Ex_GetDepth())
@@ -299,18 +305,21 @@ namespace Rito.UnityLibrary.EditorPlugins
             }
         }
 
+        [MenuItem(GameObject_Rito_ + "Rename (Same) #F2", true)]
+        private static bool Validate_GameObject_RenameWithTheSame()
+        {
+            if (!IsGameObjectInHierarchySelected()) return false;
+            if (Selection.gameObjects.Length <= 1) return false; // 하나만 선택한 경우 안함
+            return true;
+        }
+
+
+        // Alt + F2
         /// <summary> 연속된 이름으로 바꾸기 (인덱스 유지) </summary>
-        [MenuItem(GameObject_Rito_ + "Rename (Continuous)", priority = PriorityBegin + 1)]
+        [MenuItem(GameObject_Rito_ + "Rename (Continuous) &F2", priority = PriorityBegin + 3)]
         private static void GameObject_RenameWithTheContinuous()
         {
             if (IsDuplicatedMethodCall()) return;
-            if (!IsGameObjectInHierarchySelected()) return;
-            if (Selection.gameObjects.Length <= 1) return; // 하나만 선택한 경우 안함
-            if (!SelectedTopLevelTransforms.Ex_HasSameParent())
-            {
-                Debug.LogError("부모가 같은 게임오브젝트들을 선택해야 합니다.");
-                return;
-            }
 
             // Sibling Index로 정렬
             var selectedGameObjects = Selection.gameObjects.OrderBy(go => go.transform.GetSiblingIndex()).ToArray();
@@ -353,6 +362,64 @@ namespace Rito.UnityLibrary.EditorPlugins
             }
         }
 
+        [MenuItem(GameObject_Rito_ + "Rename (Continuous) &F2", true)]
+        private static bool Validate_GameObject_RenameWithTheContinuous()
+        {
+            if (!IsGameObjectInHierarchySelected()) return false;
+            if (Selection.gameObjects.Length <= 1) return false; // 하나만 선택한 경우 안함
+            if (!SelectedTopLevelTransforms.Ex_HasSameParent()) return false;
+            return true;
+        }
+
+
+        // Ctrl + Shift + D
+        /// <summary> 동일하게 복제 </summary>
+        [MenuItem(GameObject_Rito_ + "Duplicate As Same %#D", priority = PriorityBegin + 4)]
+        private static void DuplicateAsSame()
+        {
+            if (IsDuplicatedMethodCall()) return;
+
+            // 하이라키 관계인 경우, 최상위 부모만 선택
+            // + 자식 번호 순서대로 정렬
+            var transforms = SelectedTopLevelTransforms
+                .OrderBy(go => go.transform.GetSiblingIndex()).ToArray();
+
+            GameObject[] nextSelections = new GameObject[transforms.Length];
+
+            int i = 0;
+            foreach (var tr in transforms)
+            {
+                GameObject duplicated;
+
+                // 프리팹일 경우, 프리팹상태로 복제
+                Object prefabRoot = PrefabUtility.GetCorrespondingObjectFromSource(tr.gameObject);
+                if(prefabRoot != null)
+                    duplicated = PrefabUtility.InstantiatePrefab(prefabRoot) as GameObject;
+                else
+                    duplicated = GameObject.Instantiate(tr.gameObject);
+                
+                // 부모 설정, 자식 순서 설정
+                duplicated.transform.SetParent(tr.parent != null ? tr.parent : null);
+                duplicated.transform.SetAsLastSibling();
+
+                // 이름 유지
+                duplicated.name = tr.gameObject.name;
+
+                Undo.RegisterCreatedObjectUndo(duplicated, "Duplicate As Same");
+
+                nextSelections[i++] = duplicated;
+            }
+
+            // 선택에 넣기
+            Selection.objects = nextSelections.ToArray();
+        }
+
+        [MenuItem(GameObject_Rito_ + "Duplicate As Same %#D", true)]
+        private static bool Validate_DuplicateAsSame()
+        {
+            if (!IsGameObjectInHierarchySelected()) return false;
+            return true;
+        }
         #endregion
 
     }
