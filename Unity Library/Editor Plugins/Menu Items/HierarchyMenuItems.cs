@@ -179,6 +179,29 @@ namespace Rito.UnityLibrary.EditorPlugins
             CheckFocusedWindow(EditorWindowType.Game | EditorWindowType.Console).DebugLog();
         }*/
 
+        [MenuItem(GameObject_Rito_ + "Create Division Line", priority = PriorityBegin - 100)]
+        private static void GameObject_CreateLineObject()
+        {
+            if (IsDuplicatedMethodCall()) return;
+
+            GameObject newGo = new GameObject("───────────────────────────────────────────");
+            Transform activeTr = Selection.activeTransform;
+            Transform newTr = newGo.transform;
+
+            if (activeTr)
+            {
+                if (activeTr.parent != null)
+                {
+                    newTr.SetParent(activeTr.parent);
+                }
+
+                newTr.SetSiblingIndex(activeTr.GetSiblingIndex() + 1);
+            }
+
+            Undo.RegisterCreatedObjectUndo(newGo, $"Create DIvision Line GameObject");
+        }
+
+
         // Ctrl + G
         /// <summary> 선택된 게임오브젝트들을 하나의 부모 게임오브젝트로 묶기  </summary>
         [MenuItem(GameObject_Rito_ + "Group %G", priority = PriorityBegin)]
