@@ -18,7 +18,7 @@ namespace Rito.UnityLibrary.EditorPlugins
     [InitializeOnLoad]
     public static class SceneAutoSaver
     {
-        private const bool  DefaultActivated = true;
+        private const bool  DefaultActivated = false;
         private const bool  DefaultShowLog   = true;
         private const float DefaultSaveCycle = 30f;
 
@@ -63,16 +63,16 @@ namespace Rito.UnityLibrary.EditorPlugins
 
         public static void SaveOptions()
         {
-            EditorPrefs.SetBool(Prefix + nameof(Activated), Activated);
-            EditorPrefs.SetBool(Prefix + nameof(ShowLog), ShowLog);
-            EditorPrefs.SetFloat(Prefix + nameof(SaveCycle), (float)SaveCycle);
+            PlayerPrefs.SetInt(Prefix + nameof(Activated), Activated ? 1 : 0);
+            PlayerPrefs.SetInt(Prefix + nameof(ShowLog), ShowLog ? 1 : 0);
+            PlayerPrefs.SetFloat(Prefix + nameof(SaveCycle), (float)SaveCycle);
         }
 
         private static void LoadOptions()
         {
-            Activated = EditorPrefs.GetBool(Prefix + nameof(Activated), DefaultActivated);
-            ShowLog   = EditorPrefs.GetBool(Prefix + nameof(ShowLog), DefaultShowLog);
-            SaveCycle = EditorPrefs.GetFloat(Prefix + nameof(SaveCycle), DefaultSaveCycle);
+            Activated = PlayerPrefs.GetInt(Prefix + nameof(Activated), DefaultActivated ? 1 : 0) == 1 ? true : false;
+            ShowLog   = PlayerPrefs.GetInt(Prefix + nameof(ShowLog), DefaultShowLog ? 1 : 0) == 1 ? true : false;
+            SaveCycle = PlayerPrefs.GetFloat(Prefix + nameof(SaveCycle), DefaultSaveCycle);
 
             // 소수점 두자리 컷
             SaveCycle = Math.Floor(SaveCycle * 100.0) * 0.01;

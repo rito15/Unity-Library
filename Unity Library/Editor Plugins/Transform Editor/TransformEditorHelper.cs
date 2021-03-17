@@ -26,7 +26,7 @@ namespace Rito.UnityLibrary.EditorPlugins
             InitFolderPath();
 
             // Load Adv Foldout Value
-            TransformEditor.LoadGlobalFoldOutValue(EditorPrefs.GetBool(GlobalPrefName, false));
+            TransformEditor.LoadGlobalFoldOutValue(PlayerPrefs.GetInt(GlobalPrefName, 0) == 1 ? true : false);
 #endif
         }
 
@@ -58,12 +58,12 @@ namespace Rito.UnityLibrary.EditorPlugins
             return (target, onEnableMethod, rotationFieldMethod);
         }
         /***********************************************************************
-        *                               EditorPrefs
+        *                               PlayerPrefs
         ***********************************************************************/
 #region .
         private const string GlobalPrefName = "TE_GlobalFoldOut";
 
-        public static void SaveGlobalFoldOutPref(bool value) => EditorPrefs.SetBool(GlobalPrefName, value);
+        public static void SaveGlobalFoldOutPref(bool value) => PlayerPrefs.SetInt(GlobalPrefName, value ? 1 : 0);
 
 #endregion
         /***********************************************************************
@@ -75,8 +75,8 @@ namespace Rito.UnityLibrary.EditorPlugins
 
         private static bool MenuItemChecked
         {
-            get => EditorPrefs.GetBool(MenuItemTitle, false);
-            set => EditorPrefs.SetBool(MenuItemTitle, value);
+            get => PlayerPrefs.GetInt(MenuItemTitle, 0) == 1 ? true : false;
+            set => PlayerPrefs.SetInt(MenuItemTitle, value ? 1 : 0);
         }
 
         [MenuItem(MenuItemTitle, false)]

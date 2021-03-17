@@ -19,7 +19,7 @@ namespace Rito.UnityLibrary.EditorPlugins
 {
     public class ModelPivotResetter : AssetPostprocessor
     {
-        private const bool DefaultActivated = true;
+        private const bool DefaultActivated = false;
         private const bool DefaultShowDialog = false;
 
         private void OnPostprocessModel(GameObject go)
@@ -101,8 +101,8 @@ namespace Rito.UnityLibrary.EditorPlugins
 
         public static bool Activated
         {
-            get { return EditorPrefs.GetBool(ActivationSettingName, DefaultActivated); }
-            set { EditorPrefs.SetBool(ActivationSettingName, value); }
+            get { return PlayerPrefs.GetInt(ActivationSettingName, DefaultActivated ? 1 : 0) == 1 ? true : false; }
+            set { PlayerPrefs.SetInt(ActivationSettingName, value ? 1 : 0); }
         }
 
         [MenuItem(ActivationMenuName)]
@@ -121,8 +121,8 @@ namespace Rito.UnityLibrary.EditorPlugins
 
         public static bool ShowDialog
         {
-            get { return EditorPrefs.GetBool(ShowDialogSettingName, DefaultShowDialog); }
-            set { EditorPrefs.SetBool(ShowDialogSettingName, value); }
+            get { return PlayerPrefs.GetInt(ShowDialogSettingName, DefaultShowDialog ? 1 : 0) == 1 ? true : false; }
+            set { PlayerPrefs.SetInt(ShowDialogSettingName, value ? 1 : 0); }
         }
 
         [MenuItem(ShowDialogMenuName)]
