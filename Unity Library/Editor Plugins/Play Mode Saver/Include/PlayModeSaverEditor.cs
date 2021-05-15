@@ -3,8 +3,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.UIElements;
 
 #pragma warning disable CS0618
 
@@ -21,6 +24,14 @@ namespace Rito.UnityLibrary.EditorPlugins
         ***********************************************************************/
         #region .
         private PlayModeSaver pms;
+        private float currentViewWidth; // 스크롤뷰 고려하여 14f 뺀, 현재 뷰 너비
+        private float contentWidth;     // Box 내의 요소 너비
+        private float halfContentWidth; // Box 내의 요소 너비 절반
+        private const float MinusButtonWidth = 20f;
+
+        private GUILayoutOption HalfButtonWidthOption;
+        private GUILayoutOption ObjectWidthOption;
+        private GUILayoutOption ObjectMinusButtonWidthOption;
 
         private static readonly Color GreenColor = Color.green;
         private static readonly Color RedColor = Color.red * 2f;
@@ -103,6 +114,15 @@ namespace Rito.UnityLibrary.EditorPlugins
 
         public override void OnInspectorGUI()
         {
+            currentViewWidth = EditorGUIUtility.currentViewWidth - 14f;
+            contentWidth = currentViewWidth - 26f;
+            halfContentWidth = contentWidth * 0.5f;
+
+            HalfButtonWidthOption = GUILayout.Width(halfContentWidth);
+            ObjectWidthOption = GUILayout.Width(contentWidth - MinusButtonWidth);
+            ObjectMinusButtonWidthOption = GUILayout.Width(MinusButtonWidth);
+
+            // -
             Color oldBgColor = GUI.backgroundColor;
             Color oldcntColor = GUI.contentColor;
 
@@ -147,14 +167,14 @@ namespace Rito.UnityLibrary.EditorPlugins
                 {
                     GUI.contentColor = Color.white;
                     GUI.backgroundColor = pms._activated ? GreenColor : RedColor;
-                    if (GUILayout.Button("Activated"))
+                    if (GUILayout.Button("Activated", HalfButtonWidthOption))
                     {
                         Undo.RecordObject(pms, "Change Activated Value");
                         pms._activated = !pms._activated;
                     }
 
                     GUI.backgroundColor = pms._alwaysOnTop ? GreenColor : RedColor;
-                    if (GUILayout.Button("Always On Top"))
+                    if (GUILayout.Button("Always On Top", HalfButtonWidthOption))
                     {
                         Undo.RecordObject(pms, "Change Always On Top Value");
                         pms._alwaysOnTop = !pms._alwaysOnTop;
@@ -183,13 +203,13 @@ namespace Rito.UnityLibrary.EditorPlugins
                 {
                     GUI.contentColor = Color.white;
                     GUI.backgroundColor = Color.blue;
-                    if (GUILayout.Button("Add All Components"))
+                    if (GUILayout.Button("Add All Components", HalfButtonWidthOption))
                     {
                         Undo.RecordObject(pms, "Add All PMS Components");
                         pms.AddAllComponentsInGameObject();
                     }
 
-                    if (GUILayout.Button("Remove All Components"))
+                    if (GUILayout.Button("Remove All Components", HalfButtonWidthOption))
                     {
                         Undo.RecordObject(pms, "Remove All PMS Components");
                         pms.RemoveAllTargetComponents();
@@ -220,10 +240,10 @@ namespace Rito.UnityLibrary.EditorPlugins
                     {
                         GUI.backgroundColor = Color.black;
                         using (new EditorGUI.DisabledGroupScope(true))
-                            _ = EditorGUILayout.ObjectField(pms._targetList[i], typeof(Component));
+                            _ = EditorGUILayout.ObjectField(pms._targetList[i], typeof(Component), ObjectWidthOption);
 
                         GUI.backgroundColor = RedColor;
-                        if (GUILayout.Button("-", GUILayout.Width(20f)))
+                        if (GUILayout.Button("-", ObjectMinusButtonWidthOption))
                         {
                             Undo.RecordObject(pms, "Remove PMS Components");
                             pms._targetList.RemoveAt(i);
@@ -246,7 +266,10 @@ namespace Rito.UnityLibrary.EditorPlugins
             in Color boxColor, in Color headerColor, in Color titleColor)
         {
             const float boxX = 14f;
-            const float padding = 4f;
+            const float padding = 4f; // 박스 내에서 헤더와의 여유 간격
+
+            const float marginRight = 1f; // 박스의 우측 끝과 뷰의 우측 끝 사이 간격
+
             const float headerX = boxX + padding;
             const float headerH = 18f;
 
@@ -254,12 +277,11 @@ namespace Rito.UnityLibrary.EditorPlugins
             float headerAreaH = headerH + padding * 2f;
             float headerY = boxY + padding;
 
-            float viewWidth = EditorGUIUtility.currentViewWidth;
-            float headerW = viewWidth - headerX * 2f;
-            float boxW = viewWidth - boxX * 2f;
+            float boxW    = currentViewWidth - boxX - marginRight;
+            float headerW = currentViewWidth - headerX - padding - marginRight;
 
             // 펼쳤을 때만 박스 보여주기
-            boxH = foldout ? (boxH + headerAreaH) : (headerAreaH);
+            boxH = foldout ? (boxH + headerAreaH) : (headerAreaH); // 헤더 + 박스 전체 높이
 
             GUI.backgroundColor = boxColor;
             GUI.Box(new Rect(boxX, boxY, boxW, boxH), ""); // Box
