@@ -42,8 +42,8 @@ namespace Rito.UnityLibrary.EditorPlugins
                 {
                     me.meshFilter = me.GetComponent<MeshFilter>();
 
-                    if(me.meshFilter != null)
-                        me.mesh = me.meshFilter.sharedMesh;
+                    //if(me.meshFilter != null)
+                    //    me.mesh = me.meshFilter.sharedMesh;
                 }
             }
 
@@ -194,7 +194,9 @@ namespace Rito.UnityLibrary.EditorPlugins
 
                     EditorGUILayout.Space(4f);
                     me.showBounds = EditorGUILayout.Toggle("Show Bounds", me.showBounds);
-                    me.confineInBounds = EditorGUILayout.Toggle("Confine Pivot In Bounds", me.confineInBounds);
+
+                    using (new EditorGUI.DisabledGroupScope(!me.showBounds))
+                        me.confineInBounds = EditorGUILayout.Toggle("Confine Pivot In Bounds", me.confineInBounds);
                 }
 
                 EditorGUILayout.Space(8f);
@@ -205,6 +207,10 @@ namespace Rito.UnityLibrary.EditorPlugins
 
                 if (GUILayout.Button("Reset Transform", safeViewWidthOption, ApplyButtonHeightOption))
                 {
+                    // 피벗 위치도 함께 이동
+                    Undo.RecordObject(me, "Reset Transform");
+                    me.pivotPos -= me.transform.position;
+
                     Undo.RecordObject(me.transform, "Reset Transform");
                     me.transform.localPosition = Vector3.zero;
                     me.transform.localRotation = Quaternion.identity;
@@ -215,6 +221,10 @@ namespace Rito.UnityLibrary.EditorPlugins
                 {
                     if (GUILayout.Button("Reset Position", safeViewWidthThirdOption, ApplyButtonHeightOption))
                     {
+                        // 피벗 위치도 함께 이동
+                        Undo.RecordObject(me, "Reset Position");
+                        me.pivotPos -= me.transform.position;
+
                         Undo.RecordObject(me.transform, "Reset Position");
                         me.transform.localPosition = Vector3.zero;
                     }
@@ -245,7 +255,7 @@ namespace Rito.UnityLibrary.EditorPlugins
                         ApplyToCurrentMesh();
                     }
 
-                    if (GUILayout.Button("Save As New", safeViewWidthHalfOption, ApplyButtonHeightOption))
+                    if (GUILayout.Button("Save As New File", safeViewWidthHalfOption, ApplyButtonHeightOption))
                     {
                         SaveAsNewMesh();
                     }
@@ -294,8 +304,8 @@ namespace Rito.UnityLibrary.EditorPlugins
                 // Bounds
                 if (me.showBounds)
                 {
-                    Vector3 boundsCenter = me.transform.position + me.mesh.bounds.center;
-                    Vector3 boundsSize = me.mesh.bounds.size;
+                    Vector3 boundsCenter = me.transform.position + me.meshFilter.sharedMesh.bounds.center;
+                    Vector3 boundsSize = me.meshFilter.sharedMesh.bounds.size;
                     //Vector3 boundsSize = me.transform.localToWorldMatrix.MultiplyPoint(me.mesh.bounds.size);
 
                     Handles.DrawWireCube(boundsCenter, boundsSize);
@@ -402,6 +412,7 @@ namespace Rito.UnityLibrary.EditorPlugins
             {
                 Mesh newMesh = EditMesh();
                 newMesh.name = me.meshFilter.sharedMesh.name;
+
                 Undo.RecordObject(me.meshFilter, "Edit Mesh");
                 me.meshFilter.sharedMesh = newMesh;
             }

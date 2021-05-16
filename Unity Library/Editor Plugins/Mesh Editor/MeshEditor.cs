@@ -15,7 +15,6 @@ namespace Rito.UnityLibrary.EditorPlugins
     public partial class MeshEditor : MonoBehaviour
     {
         private MeshFilter meshFilter;
-        private Mesh mesh;
 
         private Vector3 pivotPos = Vector3.zero;
         private bool editMode;
