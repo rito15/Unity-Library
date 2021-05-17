@@ -14,61 +14,8 @@ namespace Rito.UnityLibrary.EditorPlugins
 {
     public partial class MeshEditor : MonoBehaviour
     {
-        [CustomEditor(typeof(MeshEditor))]
-        private class Custom : UnityEditor.Editor
+        private partial class Custom : UnityEditor.Editor
         {
-            private static readonly Color HandleColor      = new Color(0.6f, 0.4f, 0.9f, 1.0f);
-            private static readonly Color DarkButtonColor  = new Color(0.5f, 0.3f, 0.7f, 1.0f);
-            private static readonly Color DarkButtonColor2 = new Color(0.4f, 0.1f, 0.5f, 1.0f);
-            private static readonly Color LightButtonColor = new Color(0.9f, 0.7f, 1.4f, 1.0f);
-            private static readonly Color ContentColor     = new Color(1.4f, 1.1f, 1.8f, 1.0f);
-            private static readonly Color BackgroundColor  = new Color(0.3f, 0.1f, 0.6f, 0.2f);
-
-            private const float HeaderButtonHeight = 48f;
-            private const float ContentHeight = HeaderButtonHeight + 132f;
-            private const float FullContentHeight = ContentHeight + 120f;
-
-            private MeshEditor me;
-            private float viewWidth;
-            private float safeViewWidth;
-            private GUILayoutOption safeViewWidthOption;
-            private GUILayoutOption safeViewWidthHalfOption;  // 1/2
-            private GUILayoutOption safeViewWidthThirdOption; // 1/3
-
-            private void OnEnable()
-            {
-                me = target as MeshEditor;
-
-                if (me.meshFilter == null)
-                {
-                    me.meshFilter = me.GetComponent<MeshFilter>();
-
-                    //if(me.meshFilter != null)
-                    //    me.mesh = me.meshFilter.sharedMesh;
-                }
-
-                if (me.meshRenderer == null)
-                {
-                    me.meshRenderer = me.GetComponent<MeshRenderer>();
-                }
-            }
-
-            public override void OnInspectorGUI()
-            {
-                if(DrawWarnings()) return;
-
-                EditorGUILayout.Space(4f);
-
-                InitValues();
-                DrawBackgroundBox();
-                DrawEditOrCancleButton();
-
-                if (me.editMode)
-                    DrawEditModeInspector();
-
-                EditorGUILayout.Space(4f);
-            }
-
             private bool DrawWarnings()
             {
                 if (EditorApplication.isPlaying)
@@ -92,21 +39,15 @@ namespace Rito.UnityLibrary.EditorPlugins
                 return false;
             }
 
-            private void InitValues()
-            {
-                viewWidth = EditorGUIUtility.currentViewWidth;
-                safeViewWidth = viewWidth - 36f;
-                safeViewWidthOption = GUILayout.Width(safeViewWidth);
-                safeViewWidthHalfOption = GUILayout.Width(safeViewWidth * 0.5f - 1f);
-                safeViewWidthThirdOption = GUILayout.Width(safeViewWidth / 3f - 2f);
-            }
-
             private void DrawBackgroundBox()
             {
                 float inspectorHeight = me.editMode ? me.pivotEditMode ? 
                     FullContentHeight : 
                     ContentHeight : 
                     HeaderButtonHeight;
+
+                if(me.showBounds && me.confineInBounds)
+                    inspectorHeight += 48f;
 
                 Rect box = new Rect(0f, 0f, viewWidth, inspectorHeight);
 
@@ -137,6 +78,9 @@ namespace Rito.UnityLibrary.EditorPlugins
                     {
                         me.pivotPos = me.transform.position;
                         me.pivotEditMode = true;
+                        
+                        if(string.IsNullOrWhiteSpace(me.meshName))
+                            me.meshName = me.meshFilter.sharedMesh.name;
                     }
                     // Click : Cancel
                     else
@@ -151,30 +95,21 @@ namespace Rito.UnityLibrary.EditorPlugins
                 GUI.skin.button.fontStyle = oldFontStyle;
             }
 
-            private static readonly GUILayoutOption ApplyButtonHeightOption = GUILayout.Height(24f);
-            private void DrawEditModeInspector()
+            private void DrawEditPivotToggle()
             {
-                EditorGUILayout.Space(12f);
-
-                // Remember Old Styles
-                var oldColor = GUI.color;
-                var oldBG = GUI.backgroundColor;
-                var oldFontStyle = GUI.skin.button.fontStyle;
-
-                // == 1. Toggle ==================================================================
                 GUI.color = ContentColor;
 
                 using (var cs = new EditorGUI.ChangeCheckScope())
                 {
+                    Undo.RecordObject(me, "Change Edit Pivot Toggle");
                     me.pivotEditMode = EditorGUILayout.Toggle("Edit Pivot", me.pivotEditMode);
 
                     //if (cs.changed && !me.pivotEditMode)
                     //    Tools.current = Tool.Move;
                 }
-
-                // TODO : Undo
-
-                // == 2. Fields ==================================================================
+            }
+            private void DrawEditModeFields()
+            {
                 if (me.pivotEditMode)
                 {
                     Undo.RecordObject(me, "Change Pivot Position");
@@ -191,9 +126,12 @@ namespace Rito.UnityLibrary.EditorPlugins
 
                     EditorGUILayout.Space(4f);
 
+                    // Snap Toogle
                     Undo.RecordObject(me, "Change Snap");
                     me.snapMode = EditorGUILayout.Toggle("Snap", me.snapMode);
-                    if (me.snapMode)
+
+                    // Snap Value Slider
+                    using (new EditorGUI.DisabledGroupScope(!me.snapMode))
                     {
                         Undo.RecordObject(me, "Change Snap Value");
                         float snap = EditorGUILayout.Slider("", me.snapValue, 0f, 1f);
@@ -201,32 +139,54 @@ namespace Rito.UnityLibrary.EditorPlugins
                     }
 
                     EditorGUILayout.Space(4f);
+
+                    // Bounds Toggle
                     Undo.RecordObject(me, "Change Show Bounds");
                     me.showBounds = EditorGUILayout.Toggle("Show Bounds", me.showBounds);
 
+                    // Bounds - Confine Toggle
                     using (new EditorGUI.DisabledGroupScope(!me.showBounds))
                     {
                         Undo.RecordObject(me, "Change Confine In Bounds");
                         me.confineInBounds = EditorGUILayout.Toggle("Confine Pivot In Bounds", me.confineInBounds);
                     }
+
+                    // Normalized X, Y, Z Pivot Point Slider
+                    if (me.showBounds && me.confineInBounds)
+                    {
+                        me.normalizedPivotPoint.x = 
+                            EditorGUILayout.Slider("X", me.normalizedPivotPoint.x, 0f, 1f);
+                        me.normalizedPivotPoint.y = 
+                            EditorGUILayout.Slider("Y", me.normalizedPivotPoint.y, 0f, 1f);
+                        me.normalizedPivotPoint.z = 
+                            EditorGUILayout.Slider("Z", me.normalizedPivotPoint.z, 0f, 1f);
+                    }
                 }
-
-                EditorGUILayout.Space(8f);
-
-                // == 3. Transform Reset Buttons ==================================================
+            }
+            private void DrawTransformResetButtons()
+            {
                 GUI.backgroundColor = DarkButtonColor;
                 GUI.skin.button.fontStyle = FontStyle.Bold;
 
-                if (GUILayout.Button("Reset Transform", safeViewWidthOption, ApplyButtonHeightOption))
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    // 피벗 위치도 함께 이동
-                    Undo.RecordObject(me, "Reset Transform");
-                    me.pivotPos -= me.transform.position;
+                    if (GUILayout.Button("Reset Transform", safeViewWidthHalfOption, ApplyButtonHeightOption))
+                    {
+                        // 피벗 위치도 함께 이동
+                        Undo.RecordObject(me, "Reset Transform");
+                        me.pivotPos -= me.transform.position;
 
-                    Undo.RecordObject(me.transform, "Reset Transform");
-                    me.transform.localPosition = Vector3.zero;
-                    me.transform.localRotation = Quaternion.identity;
-                    me.transform.localScale = Vector3.one;
+                        Undo.RecordObject(me.transform, "Reset Transform");
+                        me.transform.localPosition = Vector3.zero;
+                        me.transform.localRotation = Quaternion.identity;
+                        me.transform.localScale = Vector3.one;
+                    }
+
+                    if (GUILayout.Button("Reset Pivot Position", safeViewWidthHalfOption, ApplyButtonHeightOption))
+                    {
+                        Undo.RecordObject(me, "Reset Pivot Position");
+                        me.pivotPos = me.transform.position;
+                    }
                 }
 
                 using (new EditorGUILayout.HorizontalScope())
@@ -253,17 +213,37 @@ namespace Rito.UnityLibrary.EditorPlugins
                         me.transform.localScale = Vector3.one;
                     }
                 }
+            }
+            private void DrawApplyButtons()
+            {
 
-                EditorGUILayout.Space(8f);
-
-                // == 4. Apply Buttons =============================================================
                 GUI.backgroundColor = DarkButtonColor2;
                 GUI.skin.button.fontStyle = FontStyle.Bold;
+
+                //using (new EditorGUILayout.HorizontalScope())
+                //{
+                //    EditorGUILayout.LabelField("Mesh Name",
+                //        boldLabelStyle,
+                //        GUILayout.Width(80f)
+                //    );
+
+                //    Undo.RecordObject(me, "Change Mesh Name");
+                //    me.meshName = EditorGUILayout.TextField(me.meshName);
+                //}
+                Undo.RecordObject(me, "Change Mesh Name");
+                me.meshName = EditorGUILayout.TextField("Mesh Name", me.meshName);
+
+                if (string.IsNullOrWhiteSpace(me.meshName))
+                {
+                    EditorGUILayout.HelpBox("Input Mesh Name", MessageType.Error);
+                    return;
+                }
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     if (GUILayout.Button("Apply", safeViewWidthHalfOption, ApplyButtonHeightOption))
                     {
+                        Undo.RecordObject(me, "Click Edit Mesh Button");
                         ApplyToCurrentMesh();
                     }
 
@@ -272,25 +252,6 @@ namespace Rito.UnityLibrary.EditorPlugins
                         SaveAsObjFile();
                     }
                 }
-
-                // Restore Styles
-                GUI.color = oldColor;
-                GUI.backgroundColor = oldBG;
-                GUI.skin.button.fontStyle = oldFontStyle;
-            }
-
-            public void OnSceneGUI()
-            {
-                if (me.pivotEditMode)
-                {
-                    //Tools.current = Tool.None;
-
-                    DrawPivotHandle();
-
-                    Handles.BeginGUI();
-                    DrawSceneGUI();
-                    Handles.EndGUI();
-                }
             }
 
             private void DrawPivotHandle()
@@ -298,6 +259,7 @@ namespace Rito.UnityLibrary.EditorPlugins
                 Handles.color = HandleColor;
                 float size = HandleUtility.GetHandleSize(me.pivotPos) * 0.8f;
 
+                Undo.RecordObject(me, "Move Pivot Position");
                 me.pivotPos = Handles.Slider(me.pivotPos, Vector3.right,   size, Handles.ArrowHandleCap, 1f); // +X
                 me.pivotPos = Handles.Slider(me.pivotPos, Vector3.left,    size, Handles.ArrowHandleCap, 1f); // -X
                 me.pivotPos = Handles.Slider(me.pivotPos, Vector3.up,      size, Handles.ArrowHandleCap, 1f); // +Y
@@ -307,8 +269,8 @@ namespace Rito.UnityLibrary.EditorPlugins
 
                 Handles.DrawSphere(0, me.pivotPos, Quaternion.identity, size * 0.15f);
 
-                // Snap
-                if (me.snapValue > 0f)
+                // Snap 
+                if (me.snapMode && me.snapValue > 0f)
                 {
                     me.pivotPos = SnapVector3(me.pivotPos, me.snapValue);
                 }
@@ -329,19 +291,33 @@ namespace Rito.UnityLibrary.EditorPlugins
             private void DrawSceneGUI()
             {
                 const float width = 160f;
-                const float height = 80f;
+                const float height = 100f;
                 const float paddingX = 70f;
                 const float paddingY = 30f;
 
-                float H = height;
-                if(me.snapMode) H += 20f;
-
-                windowRect = new Rect(Screen.width - width - paddingX, Screen.height - H - paddingY, width, H);
+                windowRect = new Rect
+                (
+                    Screen.width  - width  - paddingX, 
+                    Screen.height - height - paddingY, 
+                    width,
+                    height
+                );
 
                 windowRect = GUILayout.Window(windowID, windowRect, (id) => {
 
                     EditorGUILayout.Space(4f);
-                    EditorGUILayout.Vector3Field("", me.pivotPos);
+
+                    Undo.RecordObject(me, "Move Pivot Position");
+                    Vector3 pivotPos = EditorGUILayout.Vector3Field("", me.pivotPos);
+
+                    if (me.snapMode && me.snapValue > 0f)
+                    {
+                        me.pivotPos = SnapVector3(pivotPos, me.snapValue);
+                    }
+                    else
+                    {
+                        me.pivotPos = pivotPos;
+                    }
 
                     EditorGUILayout.Space(4f);
 
@@ -350,12 +326,12 @@ namespace Rito.UnityLibrary.EditorPlugins
                         EditorGUILayout.LabelField("Snap", GUILayout.Width(32f));
                         me.snapMode = EditorGUILayout.ToggleLeft("", me.snapMode, GUILayout.Width(16f));
                     }
-                    if (me.snapMode)
+
+                    using (new EditorGUI.DisabledGroupScope(!me.snapMode))
                     {
                         float snap = EditorGUILayout.Slider("", me.snapValue, 0f, 1f);
                         me.snapValue = Mathf.Round(snap / 0.05f) * 0.05f;
                     }
-
 
                     //GUI.DragWindow();
 
@@ -423,7 +399,7 @@ namespace Rito.UnityLibrary.EditorPlugins
             private void ApplyToCurrentMesh()
             {
                 Mesh newMesh = EditMesh();
-                newMesh.name = me.meshFilter.sharedMesh.name;
+                newMesh.name = me.meshName;
 
                 Undo.RecordObject(me.meshFilter, "Edit Mesh");
                 me.meshFilter.sharedMesh = newMesh;
@@ -431,7 +407,7 @@ namespace Rito.UnityLibrary.EditorPlugins
 
             private void SaveAsObjFile()
             {
-                string meshName = me.meshFilter.sharedMesh.name;
+                string meshName = me.meshName;
                 string path = 
                     EditorUtility.SaveFilePanelInProject("Save Mesh As Obj File", meshName, "obj", "");
 
@@ -441,20 +417,6 @@ namespace Rito.UnityLibrary.EditorPlugins
                 Mesh newMesh = EditMesh();
                 ObjExporter.SaveMeshToFile(newMesh, me.meshRenderer, meshName, path);
                 AssetDatabase.Refresh();
-            }
-
-            private void EditCollider(in Vector3 offset)
-            {
-                me.TryGetComponent(out Collider col);
-                if (col)
-                {
-                    if(col is SphereCollider sc)
-                        sc.center -= offset;
-                    else if (col is BoxCollider bc)
-                        bc.center -= offset;
-                    else if (col is CapsuleCollider cc)
-                        cc.center -= offset;
-                }
             }
 
             /// <summary> 벡터를 일정 단위로 끊기 </summary>
