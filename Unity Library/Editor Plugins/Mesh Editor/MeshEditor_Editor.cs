@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 
 using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -44,6 +45,11 @@ namespace Rito.UnityLibrary.EditorPlugins
 
                     //if(me.meshFilter != null)
                     //    me.mesh = me.meshFilter.sharedMesh;
+                }
+
+                if (me.meshRenderer == null)
+                {
+                    me.meshRenderer = me.GetComponent<MeshRenderer>();
                 }
             }
 
@@ -255,9 +261,9 @@ namespace Rito.UnityLibrary.EditorPlugins
                         ApplyToCurrentMesh();
                     }
 
-                    if (GUILayout.Button("Save As New File", safeViewWidthHalfOption, ApplyButtonHeightOption))
+                    if (GUILayout.Button("Save As Obj File", safeViewWidthHalfOption, ApplyButtonHeightOption))
                     {
-                        SaveAsNewMesh();
+                        SaveAsObjFile();
                     }
                 }
 
@@ -417,13 +423,17 @@ namespace Rito.UnityLibrary.EditorPlugins
                 me.meshFilter.sharedMesh = newMesh;
             }
 
-            private void SaveAsNewMesh()
+            private void SaveAsObjFile()
             {
-                Mesh newMesh = EditMesh();
-                newMesh.name = me.meshFilter.sharedMesh.name + " (New)";
+                string meshName = me.meshFilter.sharedMesh.name;
+                string path = 
+                    EditorUtility.SaveFilePanelInProject("Save Mesh As Obj File", meshName, "obj", "");
 
-                Undo.RecordObject(me.meshFilter, "Edit Mesh - Save As New");
-                me.meshFilter.sharedMesh = newMesh;
+                if(string.IsNullOrEmpty(path))
+                    return;
+
+                Mesh newMesh = EditMesh();
+                ObjExporter.SaveMeshToFile(newMesh, me.meshRenderer, meshName, path);
             }
 
             private void EditCollider(in Vector3 offset)
