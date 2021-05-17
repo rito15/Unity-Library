@@ -398,6 +398,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bfaf1ed1c173874b85cb866501b63fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  meshFilter: {fileID: 0}
+  meshRenderer: {fileID: 0}
+  pivotPos: {x: 0, y: 0, z: 0}
+  editMode: 0
+  pivotEditMode: 0
+  snapMode: 0
+  snapValue: 0.1
+  showBounds: 0
+  confineInBounds: 0
 --- !u!23 &474858728
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -867,6 +876,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bfaf1ed1c173874b85cb866501b63fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  meshFilter: {fileID: 1885671831}
+  meshRenderer: {fileID: 1885671830}
+  pivotPos: {x: 0, y: -1, z: 0}
+  editMode: 1
+  pivotEditMode: 1
+  snapMode: 0
+  snapValue: 0.1
+  showBounds: 0
+  confineInBounds: 0
 --- !u!23 &1885671830
 MeshRenderer:
   m_ObjectHideFlags: 0

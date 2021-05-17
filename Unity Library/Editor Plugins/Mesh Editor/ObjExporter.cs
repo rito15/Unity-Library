@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using System.Text;
 using System.Collections;
@@ -81,3 +83,5 @@ namespace Rito.UnityLibrary.EditorPlugins
         }
     }
 }
+
+#endif

@@ -177,8 +177,8 @@ namespace Rito.UnityLibrary.EditorPlugins
                 // == 2. Fields ==================================================================
                 if (me.pivotEditMode)
                 {
-                    Vector3 pivotPos = EditorGUILayout.Vector3Field("Pivot Position", me.pivotPos);
                     Undo.RecordObject(me, "Change Pivot Position");
+                    Vector3 pivotPos = EditorGUILayout.Vector3Field("Pivot Position", me.pivotPos);
 
                     if (me.snapMode)
                     {
@@ -190,19 +190,25 @@ namespace Rito.UnityLibrary.EditorPlugins
                     }
 
                     EditorGUILayout.Space(4f);
+
+                    Undo.RecordObject(me, "Change Snap");
                     me.snapMode = EditorGUILayout.Toggle("Snap", me.snapMode);
-                    //Undo.RecordObject(me, "Change Snap Value");
                     if (me.snapMode)
                     {
+                        Undo.RecordObject(me, "Change Snap Value");
                         float snap = EditorGUILayout.Slider("", me.snapValue, 0f, 1f);
                         me.snapValue = Mathf.Round(snap / 0.05f) * 0.05f;
                     }
 
                     EditorGUILayout.Space(4f);
+                    Undo.RecordObject(me, "Change Show Bounds");
                     me.showBounds = EditorGUILayout.Toggle("Show Bounds", me.showBounds);
 
                     using (new EditorGUI.DisabledGroupScope(!me.showBounds))
+                    {
+                        Undo.RecordObject(me, "Change Confine In Bounds");
                         me.confineInBounds = EditorGUILayout.Toggle("Confine Pivot In Bounds", me.confineInBounds);
+                    }
                 }
 
                 EditorGUILayout.Space(8f);
@@ -429,11 +435,12 @@ namespace Rito.UnityLibrary.EditorPlugins
                 string path = 
                     EditorUtility.SaveFilePanelInProject("Save Mesh As Obj File", meshName, "obj", "");
 
-                if(string.IsNullOrEmpty(path))
+                if(string.IsNullOrWhiteSpace(path))
                     return;
 
                 Mesh newMesh = EditMesh();
                 ObjExporter.SaveMeshToFile(newMesh, me.meshRenderer, meshName, path);
+                AssetDatabase.Refresh();
             }
 
             private void EditCollider(in Vector3 offset)

@@ -14,20 +14,20 @@ namespace Rito.UnityLibrary.EditorPlugins
     [DisallowMultipleComponent]
     public partial class MeshEditor : MonoBehaviour
     {
-        private MeshFilter meshFilter;
-        private MeshRenderer meshRenderer;
+        [SerializeField] private MeshFilter meshFilter;
+        [SerializeField] private MeshRenderer meshRenderer;
 
-        private Vector3 pivotPos = Vector3.zero;
-        private bool editMode;
-        private bool pivotEditMode;
-        private bool snapMode;
-        private float snapValue = 0.1f;
+        [SerializeField] private Vector3 pivotPos = Vector3.zero;
+        [SerializeField] private bool editMode;
+        [SerializeField] private bool pivotEditMode;
+        [SerializeField] private bool snapMode;
+        [SerializeField] private float snapValue = 0.1f;
 
         // T O D O : 트랜스폼의 회전, 스케일 변경에 따라
         //           바운드 기즈모 영역 맞추기
 
-        private bool showBounds;
-        private bool confineInBounds;
+        [SerializeField] private bool showBounds;
+        [SerializeField] private bool confineInBounds;
 
 
         private const int ContextPriority = 100;
@@ -36,7 +36,8 @@ namespace Rito.UnityLibrary.EditorPlugins
         private static void Context_AddMeshEditor(MenuCommand mc)
         {
             var component = mc.context as Component;
-            component.gameObject.AddComponent<MeshEditor>();
+            var me = component.gameObject.AddComponent<MeshEditor>();
+            PutComponentOnTop(me);
         }
 
         [MenuItem("CONTEXT/MeshFilter/Edit Mesh", true, ContextPriority)]
@@ -45,6 +46,12 @@ namespace Rito.UnityLibrary.EditorPlugins
             var component = mc.context as Component;
             MeshEditor me = component.GetComponent<MeshEditor>();
             return me == null;
+        }
+
+        /// <summary> 컴포넌트를 최상단에 올리기 </summary>
+        private static void PutComponentOnTop(Component component)
+        {
+            for (int i = 0; i < 100 && UnityEditorInternal.ComponentUtility.MoveComponentUp(component); i++);
         }
     }
 }
