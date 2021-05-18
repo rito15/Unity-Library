@@ -16,6 +16,35 @@ namespace Rito.UnityLibrary.EditorPlugins
     {
         private partial class Custom : UnityEditor.Editor
         {
+            private void InitValues()
+            {
+                viewWidth = EditorGUIUtility.currentViewWidth;
+                safeViewWidth = viewWidth - 36f;
+                safeViewWidthOption = GUILayout.Width(safeViewWidth);
+                safeViewWidthHalfOption = GUILayout.Width(safeViewWidth * 0.5f - 1f);
+                safeViewWidthThirdOption = GUILayout.Width(safeViewWidth / 3f - 2f);
+            }
+
+            private void InitStyles()
+            {
+                boldLabelStyleState = new GUIStyleState()
+                {
+                    textColor = Color.white,
+                };
+                boldLabelStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontStyle = FontStyle.Bold,
+                    normal = boldLabelStyleState,
+                };
+            }
+
+            private void RecordTransform()
+            {
+                prevPosition = me.transform.position;
+                prevRotation = me.transform.rotation;
+                prevScale = me.transform.localScale;
+            }
+
             private bool DrawWarnings()
             {
                 if (EditorApplication.isPlaying)
@@ -112,6 +141,12 @@ namespace Rito.UnityLibrary.EditorPlugins
             {
                 if (me.pivotEditMode)
                 {
+                    if (me.showBounds && IsTransformChanged)
+                    {
+                        RecalculateMinMaxBounds();
+                    }
+
+                    // 1. Pivot Position Field
                     Undo.RecordObject(me, "Change Pivot Position");
                     Vector3 pivotPos = EditorGUILayout.Vector3Field("Pivot Position", me.pivotPos);
 
@@ -124,13 +159,18 @@ namespace Rito.UnityLibrary.EditorPlugins
                         me.pivotPos = pivotPos;
                     }
 
+                    // Check Pivot Pos Changed
+                    if(me.pivotPos != prevPivotPos && me.showBounds && me.confineInBounds)
+                        Local_RecalculateNormalizedPivotPoint();
+                    prevPivotPos = me.pivotPos;
+
                     EditorGUILayout.Space(4f);
 
-                    // Snap Toogle
+                    // 2. Snap Toogle
                     Undo.RecordObject(me, "Change Snap");
                     me.snapMode = EditorGUILayout.Toggle("Snap", me.snapMode);
 
-                    // Snap Value Slider
+                    // 3. Snap Value Slider
                     using (new EditorGUI.DisabledGroupScope(!me.snapMode))
                     {
                         Undo.RecordObject(me, "Change Snap Value");
@@ -140,27 +180,64 @@ namespace Rito.UnityLibrary.EditorPlugins
 
                     EditorGUILayout.Space(4f);
 
-                    // Bounds Toggle
-                    Undo.RecordObject(me, "Change Show Bounds");
-                    me.showBounds = EditorGUILayout.Toggle("Show Bounds", me.showBounds);
+                    // 4. Bounds Toggle
+                    using (var cc = new EditorGUI.ChangeCheckScope())
+                    {
+                        Undo.RecordObject(me, "Change Show Bounds");
+                        me.showBounds = EditorGUILayout.Toggle("Show Bounds", me.showBounds);
 
-                    // Bounds - Confine Toggle
+                        if (cc.changed && me.showBounds)
+                        {
+                            RecalculateMinMaxBounds();
+
+                            if(me.confineInBounds)
+                                Local_RecalculateNormalizedPivotPoint();
+                        }
+                    }
+
+                    // 5. Bounds - Confine Toggle
                     using (new EditorGUI.DisabledGroupScope(!me.showBounds))
+                    using (var cc = new EditorGUI.ChangeCheckScope())
                     {
                         Undo.RecordObject(me, "Change Confine In Bounds");
                         me.confineInBounds = EditorGUILayout.Toggle("Confine Pivot In Bounds", me.confineInBounds);
+
+                        if(cc.changed && me.confineInBounds)
+                            Local_RecalculateNormalizedPivotPoint();
                     }
 
                     // Normalized X, Y, Z Pivot Point Slider
                     if (me.showBounds && me.confineInBounds)
                     {
-                        me.normalizedPivotPoint.x = 
-                            EditorGUILayout.Slider("X", me.normalizedPivotPoint.x, 0f, 1f);
-                        me.normalizedPivotPoint.y = 
-                            EditorGUILayout.Slider("Y", me.normalizedPivotPoint.y, 0f, 1f);
-                        me.normalizedPivotPoint.z = 
-                            EditorGUILayout.Slider("Z", me.normalizedPivotPoint.z, 0f, 1f);
+                        me.pivotPos = ClampVector3(me.pivotPos, me.minBounds, me.maxBounds);
+
+                        // 6. XYZ Sliders
+                        using (var cc = new EditorGUI.ChangeCheckScope())
+                        {
+                            me.normalizedPivotPoint.x =
+                                EditorGUILayout.Slider("X", me.normalizedPivotPoint.x, 0f, 1f);
+                            me.normalizedPivotPoint.y =
+                                EditorGUILayout.Slider("Y", me.normalizedPivotPoint.y, 0f, 1f);
+                            me.normalizedPivotPoint.z =
+                                EditorGUILayout.Slider("Z", me.normalizedPivotPoint.z, 0f, 1f);
+
+                            if (cc.changed)
+                            {
+                                me.pivotPos.x = Mathf.Lerp(me.minBounds.x, me.maxBounds.x, me.normalizedPivotPoint.x);
+                                me.pivotPos.y = Mathf.Lerp(me.minBounds.y, me.maxBounds.y, me.normalizedPivotPoint.y);
+                                me.pivotPos.z = Mathf.Lerp(me.minBounds.z, me.maxBounds.z, me.normalizedPivotPoint.z);
+                            }
+                        }
                     }
+                }
+
+                void Local_RecalculateNormalizedPivotPoint()
+                {
+                    me.pivotPos = ClampVector3(me.pivotPos, me.minBounds, me.maxBounds);
+
+                    me.normalizedPivotPoint.x = (me.pivotPos.x - me.minBounds.x) / (BoundsSize.x);
+                    me.normalizedPivotPoint.y = (me.pivotPos.y - me.minBounds.y) / (BoundsSize.y);
+                    me.normalizedPivotPoint.z = (me.pivotPos.z - me.minBounds.z) / (BoundsSize.z);
                 }
             }
             private void DrawTransformResetButtons()
@@ -172,14 +249,16 @@ namespace Rito.UnityLibrary.EditorPlugins
                 {
                     if (GUILayout.Button("Reset Transform", safeViewWidthHalfOption, ApplyButtonHeightOption))
                     {
-                        // 피벗 위치도 함께 이동
-                        Undo.RecordObject(me, "Reset Transform");
-                        me.pivotPos -= me.transform.position;
-
                         Undo.RecordObject(me.transform, "Reset Transform");
                         me.transform.localPosition = Vector3.zero;
                         me.transform.localRotation = Quaternion.identity;
                         me.transform.localScale = Vector3.one;
+
+                        // 피벗 위치도 함께 이동
+                        Undo.RecordObject(me, "Reset Transform");
+                        me.pivotPos = me.transform.position;
+
+                        RecalculateMinMaxBounds();
                     }
 
                     if (GUILayout.Button("Reset Pivot Position", safeViewWidthHalfOption, ApplyButtonHeightOption))
@@ -193,24 +272,30 @@ namespace Rito.UnityLibrary.EditorPlugins
                 {
                     if (GUILayout.Button("Reset Position", safeViewWidthThirdOption, ApplyButtonHeightOption))
                     {
-                        // 피벗 위치도 함께 이동
-                        Undo.RecordObject(me, "Reset Position");
-                        me.pivotPos -= me.transform.position;
-
                         Undo.RecordObject(me.transform, "Reset Position");
                         me.transform.localPosition = Vector3.zero;
+
+                        // 피벗 위치도 함께 이동
+                        Undo.RecordObject(me, "Reset Position");
+                        me.pivotPos = me.transform.position;
+
+                        RecalculateMinMaxBounds();
                     }
 
                     if (GUILayout.Button("Reset Rotation", safeViewWidthThirdOption, ApplyButtonHeightOption))
                     {
                         Undo.RecordObject(me.transform, "Reset Rotation");
                         me.transform.localRotation = Quaternion.identity;
+
+                        RecalculateMinMaxBounds();
                     }
 
                     if (GUILayout.Button("Reset Scale", safeViewWidthThirdOption, ApplyButtonHeightOption))
                     {
                         Undo.RecordObject(me.transform, "Reset Scale");
                         me.transform.localScale = Vector3.one;
+
+                        RecalculateMinMaxBounds();
                     }
                 }
             }
@@ -278,11 +363,11 @@ namespace Rito.UnityLibrary.EditorPlugins
                 // Bounds
                 if (me.showBounds)
                 {
-                    Vector3 boundsCenter = me.transform.position + me.meshFilter.sharedMesh.bounds.center;
-                    Vector3 boundsSize = me.meshFilter.sharedMesh.bounds.size;
+                    //Vector3 boundsCenter = me.transform.position + me.meshFilter.sharedMesh.bounds.center;
+                    //Vector3 boundsSize = me.meshFilter.sharedMesh.bounds.size;
                     //Vector3 boundsSize = me.transform.localToWorldMatrix.MultiplyPoint(me.mesh.bounds.size);
 
-                    Handles.DrawWireCube(boundsCenter, boundsSize);
+                    Handles.DrawWireCube(BoundsCenter, BoundsSize);
                 }
             }
 
@@ -428,6 +513,38 @@ namespace Rito.UnityLibrary.EditorPlugins
                 vec.y = Mathf.Round(vec.y / snapValue) * snapValue;
                 vec.z = Mathf.Round(vec.z / snapValue) * snapValue;
                 return vec;
+            }
+
+            private Vector3 ClampVector3(Vector3 vec, in Vector3 min, in Vector3 max)
+            {
+                vec.x = Mathf.Clamp(vec.x, min.x, max.x);
+                vec.y = Mathf.Clamp(vec.y, min.y, max.y);
+                vec.z = Mathf.Clamp(vec.z, min.z, max.z);
+                return vec;
+            }
+
+            private void RecalculateMinMaxBounds()
+            {
+                Mesh mesh = me.meshFilter.sharedMesh;
+
+                me.minBounds = Vector3.positiveInfinity;
+                me.maxBounds = Vector3.negativeInfinity;
+
+                foreach (var vert in mesh.vertices)
+                {
+                    Vector3 v = me.transform.TransformPoint(vert);
+
+                    if (v.x > me.maxBounds.x) me.maxBounds.x = v.x;
+                    else if (v.x < me.minBounds.x) me.minBounds.x = v.x;
+
+                    if (v.y > me.maxBounds.y) me.maxBounds.y = v.y;
+                    else if (v.y < me.minBounds.y) me.minBounds.y = v.y;
+
+                    if (v.z > me.maxBounds.z) me.maxBounds.z = v.z;
+                    else if (v.z < me.minBounds.z) me.minBounds.z = v.z;
+                }
+
+                Debug.Log("ReCalc");
             }
         }
     }

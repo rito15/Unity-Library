@@ -60,6 +60,23 @@ namespace Rito.UnityLibrary.EditorPlugins
             private GUIStyle boldLabelStyle;
             GUIStyleState boldLabelStyleState;
 
+            private Vector3 prevPivotPos;
+            private Vector3 prevPosition;
+            private Quaternion prevRotation;
+            private Vector3 prevScale;
+            private bool IsTransformChanged
+            {
+                get
+                {
+                    return
+                        me.transform.position != prevPosition ||
+                        me.transform.rotation != prevRotation ||
+                        me.transform.localScale != prevScale;
+                }
+            }
+            private Vector3 BoundsCenter => (me.minBounds + me.maxBounds) * 0.5f;
+            private Vector3 BoundsSize => (me.maxBounds - me.minBounds);
+
             private void OnEnable()
             {
                 me = target as MeshEditor;
@@ -76,6 +93,8 @@ namespace Rito.UnityLibrary.EditorPlugins
                 {
                     me.meshRenderer = me.GetComponent<MeshRenderer>();
                 }
+
+                RecordTransform();
             }
 
             public override void OnInspectorGUI()
@@ -89,7 +108,7 @@ namespace Rito.UnityLibrary.EditorPlugins
                 var oldLabelFontStyle = GUI.skin.label.fontStyle;
 
                 InitValues();
-                InitStyles();
+                //InitStyles();
 
                 EditorGUILayout.Space(4f);
                 DrawBackgroundBox();
@@ -106,6 +125,8 @@ namespace Rito.UnityLibrary.EditorPlugins
 
                     EditorGUILayout.Space(12f);
                     DrawApplyButtons();
+
+                    RecordTransform();
                 }
 
                 EditorGUILayout.Space(4f);
@@ -115,6 +136,7 @@ namespace Rito.UnityLibrary.EditorPlugins
                 GUI.backgroundColor = oldBG;
                 GUI.skin.button.fontStyle = oldButtonFontStyle;
                 GUI.skin.label.fontStyle = oldLabelFontStyle;
+
             }
 
             public void OnSceneGUI()
@@ -129,28 +151,6 @@ namespace Rito.UnityLibrary.EditorPlugins
                     DrawSceneGUI();
                     Handles.EndGUI();
                 }
-            }
-
-            private void InitValues()
-            {
-                viewWidth = EditorGUIUtility.currentViewWidth;
-                safeViewWidth = viewWidth - 36f;
-                safeViewWidthOption = GUILayout.Width(safeViewWidth);
-                safeViewWidthHalfOption = GUILayout.Width(safeViewWidth * 0.5f - 1f);
-                safeViewWidthThirdOption = GUILayout.Width(safeViewWidth / 3f - 2f);
-            }
-
-            private void InitStyles()
-            {
-                boldLabelStyleState = new GUIStyleState()
-                {
-                    textColor = Color.white,
-                };
-                boldLabelStyle = new GUIStyle(GUI.skin.label)
-                {
-                    fontStyle = FontStyle.Bold,
-                    normal = boldLabelStyleState,
-                };
             }
         }
     }

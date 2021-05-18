@@ -407,6 +407,8 @@ MonoBehaviour:
   snapValue: 0.1
   showBounds: 0
   confineInBounds: 0
+  minBounds: {x: 0, y: 0, z: 0}
+  maxBounds: {x: 0, y: 0, z: 0}
   normalizedPivotPoint: {x: 0, y: 0, z: 0}
   meshName: 
 --- !u!23 &474858728
@@ -880,14 +882,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshFilter: {fileID: 1885671831}
   meshRenderer: {fileID: 1885671830}
-  pivotPos: {x: 0, y: 0, z: 0}
+  pivotPos: {x: -0.5, y: 2, z: -0.50000024}
   editMode: 1
   pivotEditMode: 1
-  snapMode: 1
+  snapMode: 0
   snapValue: 0.1
-  showBounds: 0
-  confineInBounds: 0
-  normalizedPivotPoint: {x: 0, y: 0, z: 0}
+  showBounds: 1
+  confineInBounds: 1
+  minBounds: {x: -0.5, y: 0, z: -0.50000024}
+  maxBounds: {x: 0.5000001, y: 2, z: 0.50000006}
+  normalizedPivotPoint: {x: 0, y: 1, z: 0}
   meshName: Cylinder2
 --- !u!23 &1885671830
 MeshRenderer:
@@ -949,4 +953,4 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 18.648, y: 31.298002, z: 332.841}

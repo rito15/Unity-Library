@@ -28,11 +28,16 @@ namespace Rito.UnityLibrary.EditorPlugins
 
         [SerializeField] private bool showBounds;
         [SerializeField] private bool confineInBounds;
+
+        [SerializeField] private Vector3 minBounds;
+        [SerializeField] private Vector3 maxBounds;
         [SerializeField] private Vector3 normalizedPivotPoint; // 0~1 내로 조정
 
         [SerializeField] private string meshName;
 
 
+
+        // ==============================================================
         private const int ContextPriority = 100;
 
         [MenuItem("CONTEXT/MeshFilter/Edit Mesh", false, ContextPriority)]
