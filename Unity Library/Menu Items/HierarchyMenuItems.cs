@@ -16,7 +16,7 @@ using Object = UnityEngine.Object;
 // 날짜 : 2021-02-27 PM 11:16:42
 // 작성자 : Rito
 
-namespace Rito.UnityLibrary.EditorPlugins
+namespace Rito.UnityLibrary.Utilities
 {
     public static class HierarchyMenuItems
     {
@@ -47,7 +47,7 @@ namespace Rito.UnityLibrary.EditorPlugins
         private static bool IsDuplicatedMethodCall([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
         {
             string info = memberName + DateTime.Now.ToString();
-
+            
             if (_prevMethodCallInfo.Equals(info))
             {
                 return true;
@@ -140,7 +140,7 @@ namespace Rito.UnityLibrary.EditorPlugins
         #region .
         /// <summary> 메시지와 함께 "OK" 버튼만 존재하는 알림창 표시 </summary>
         private static bool DisplayRitoAlertDialog(in string msg)
-            => EditorUtility.DisplayDialog("Rito", msg, "OK");
+            => UnityEditor.EditorUtility.DisplayDialog("Rito", msg, "OK");
 
         /// <summary> 하이라키의 특정 게임오브젝트 선택 </summary>
         private static void SelectGameObject(GameObject go) => Selection.activeGameObject = go;
